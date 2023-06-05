@@ -1,0 +1,41 @@
+spring:
+  application:
+    #应用名称 , 可选
+    name: mt_take_out
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/db_mt?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password:
+      #初始化连接数
+      initial-size: 1
+      #最小空闲连接
+      min-idle: 1
+      #最大活动连接
+      max-active: 20
+      #获取连接时测试是否可用
+      test-on-borrow: true
+      #监控页面启动
+      filter:
+        wall:
+          config:
+            start-transaction-allow: true
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射 address_book ---> AddressBook
+    map-underscore-to-camel-case: true
+    #日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+
+#用于发送邮箱验证码的账户和密码
+email:
+#gmail
+#  userName:
+#  password:
+#qq
+  userName:
+  password:
