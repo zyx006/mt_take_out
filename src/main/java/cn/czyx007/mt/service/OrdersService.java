@@ -13,7 +13,7 @@ import cn.czyx007.mt.bean.Orders;
  * @since 2023-05-29 11:08:45
  */
 public interface OrdersService extends IService<Orders> {
-    void addOrder(Orders orders);
+    Orders addOrder(Orders orders);
 
     Page<OrdersDTO> getUserPage(Integer page, Integer pageSize, LambdaQueryWrapper<Orders> lqw);
 }

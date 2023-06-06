@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
  * @author 张宇轩
  * @since 2023-05-29 11:09:40
  */
-@RestController
+@Controller
 @RequestMapping("order")
 public class OrdersController {
     /**
@@ -40,7 +41,8 @@ public class OrdersController {
     private OrdersService ordersService;
 
     @GetMapping("/page")
-    public R<IPage<Orders>> page(@RequestParam Integer page,
+    @ResponseBody
+    public R<Page<Orders>> page(@RequestParam Integer page,
                                      @RequestParam Integer pageSize,
                                      @RequestParam(required = false) String number,
                                      @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -50,13 +52,14 @@ public class OrdersController {
         Page<Orders> ordersPage = new Page<>(page, pageSize);
         LambdaQueryWrapper<Orders> lqw = new LambdaQueryWrapper<>();
         lqw.like(number!=null, Orders::getNumber, number)
-           .gt(beginTime!=null, Orders::getOrderTime, beginTime)
-           .lt(endTime!=null, Orders::getOrderTime, endTime);
+           .ge(beginTime!=null, Orders::getOrderTime, beginTime)
+           .le(endTime!=null, Orders::getOrderTime, endTime);
         ordersService.page(ordersPage, lqw);
         return R.success(ordersPage);
     }
 
     @PutMapping
+    @ResponseBody
     public R<String> setStatus(@RequestBody Orders orders){
         LambdaUpdateWrapper<Orders> luw = new LambdaUpdateWrapper<>();
         luw.eq(Orders::getId, orders.getId()).set(Orders::getStatus, orders.getStatus());
@@ -66,18 +69,31 @@ public class OrdersController {
 
     //下单操作
     @PostMapping("/submit")
-    public R<String> addOrder(@RequestBody Orders orders){
-        ordersService.addOrder(orders);
-        return R.success("下单成功");
+    @ResponseBody
+    public R<Orders> addOrder(@RequestBody Orders orders){
+        Orders order = ordersService.addOrder(orders);
+        return R.success(order);
     }
 
     //查看订单
     @GetMapping("/userPage")
+    @ResponseBody
     public R<Page<OrdersDTO>> page(@RequestParam Integer page,
                                    @RequestParam Integer pageSize){
         LambdaQueryWrapper<Orders> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Orders::getUserId, BaseContext.getCurrentId()).orderByDesc(Orders::getOrderTime);
         Page<OrdersDTO> dtoPage = ordersService.getUserPage(page, pageSize, lqw);
         return R.success(dtoPage);
+    }
+
+    //支付完成之后的回调方法，处理订单状态等
+    @GetMapping("/afterPayOrder")
+    public String afterPayOrder(@RequestParam String out_trade_no){
+        LambdaUpdateWrapper<Orders> luw = new LambdaUpdateWrapper<>();
+        luw.eq(Orders::getNumber, out_trade_no)
+                .set(Orders::getStatus, 2)
+                .set(Orders::getCheckoutTime, LocalDateTime.now());
+        ordersService.update(luw);
+        return "redirect:/front/page/pay-success.html";
     }
 }

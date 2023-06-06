@@ -40,7 +40,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private OrderDetailService orderDetailService;
 
     @Override
-    public void addOrder(Orders orders) {
+    public Orders addOrder(Orders orders) {
         //1.查询用户信息
         User user = userService.getById(BaseContext.getCurrentId());
         //2.查询地址信息
@@ -88,6 +88,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orderDetailService.saveBatch(orderDetailList);
         //7.清空购物车数据
         shoppingCartService.remove(lqw);
+        return order;
     }
 
     @Override

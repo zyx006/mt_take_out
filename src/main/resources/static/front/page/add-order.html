@@ -195,10 +195,10 @@
                         if(res.code === 1){
                             window.requestAnimationFrame(()=>{
                                 //调用后端控制器，实现支付调用
-                                // window.location.
-                                // replace('/pay/orderPay?orderNum='+
-                                //     res.data.number+'&amount='+res.data.amount)
-                                window.location.replace('/front/page/pay-success.html')
+                                window.location.
+                                replace('/pay/orderPay?orderNum='+
+                                    res.data.number+'&amount='+res.data.amount)
+                                // window.location.replace('/front/page/pay-success.html')
                             })
                         }else{
                             this.$notify({ type:'warning', message:res.msg});
